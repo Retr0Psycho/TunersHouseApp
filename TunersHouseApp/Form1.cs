@@ -10,13 +10,11 @@ namespace TunersHouseApp
         public Form1()
         {
             InitializeComponent();
-            int weekID = checkedListBox2.SelectedIndex;
             companyID = File.ReadAllLines(filePathCompany);
             foreach (string company in companyID) checkedListBox1.Items.Add(company);
             textBox1.Enabled = false;
             checkedListBox2.Enabled = false;
-            label1.Text = "";
-            label2.Text = "";
+            label1.Text = label2.Text = "";
         }
 
         private void add_Click(object sender, EventArgs e)
@@ -55,7 +53,7 @@ namespace TunersHouseApp
                 for (int i = 1; i < contentSplit.Count(); i++) sum -= int.Parse(contentSplit[i]);
             }
             textBox1.Text = sum.ToString();
-            marginAndPercentage();
+            MarginAndPercentage();
         }
 
         private void reverse_Click(object sender, EventArgs e)
@@ -63,10 +61,8 @@ namespace TunersHouseApp
             if (!string.IsNullOrEmpty(revers))
             {
                 textBox1.Text = revers.ToString();
-                label1.Text = "";
-                label2.Text = "";
+                label1.Text = label2.Text = revers = "";
                 MessageBox.Show("Cofniêto dzia³nie popraw je albo wczytaj od nowa dane");
-                revers = "";
             }
         }
 
@@ -75,23 +71,21 @@ namespace TunersHouseApp
             if (MessageBox.Show("Pubujesz wyczyœciæ dane czy jesteœ pewien?", "Uwaga!!", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 textBox1.Text = "0";
-                marginAndPercentage();
+                MarginAndPercentage();
                 save_Click(sender, e);
             }
         }
 
         private void save_Click(object sender, EventArgs e)
         {
-            if (checkedListBox2.SelectedIndex != null)
+            if (checkedListBox2.SelectedIndex != -1)
             {
                 List<string> dataLines = new();
-                string compliteRow;
-                compliteRow = checkedListBox1.SelectedIndex.ToString() + "," + checkedListBox2.SelectedIndex.ToString() + "," + textBox1.Text;
-                dataLines.Add(compliteRow);
+                dataLines.Add( checkedListBox1.SelectedIndex.ToString() + "," + checkedListBox2.SelectedIndex.ToString() + "," + textBox1.Text );
                 foreach (string row in datahiden) dataLines.Add(row);
                 File.WriteAllLines(filePathData, dataLines.ToArray());
                 Reset();
-                load();
+                LoadData();
             }
         }
 
@@ -114,41 +108,38 @@ namespace TunersHouseApp
             int count = checkedListBox2.Items.Count;
             for (int x = 0; x < count; x++) if (index != x) checkedListBox2.SetItemCheckState(x, CheckState.Unchecked);
             textBox1.Enabled = true;
-            load();
+            LoadData();
         }
 
-        void load()
+        void LoadData()
         {
             Reset();
-            List<string> dataLines = File.ReadAllLines(filePathData).ToList();
-            foreach (string dataLine in dataLines)
+            foreach (string dataLine in File.ReadAllLines(filePathData).ToList())
             {
                 List<string> dataInRow = dataLine.Split(',').ToList();
-                string companyIndex = dataInRow[0], weekIndex = dataInRow[1], values = dataInRow[2];
-                if (companyIndex == checkedListBox1.SelectedIndex.ToString() && weekIndex == checkedListBox2.SelectedIndex.ToString()) textBox1.Text = values;
+                if (dataInRow[0] == checkedListBox1.SelectedIndex.ToString() && dataInRow[1] == checkedListBox2.SelectedIndex.ToString()) textBox1.Text = dataInRow[2];
                 else datahiden.Add(string.Format("{0},{1},{2}", dataInRow[0], dataInRow[1], dataInRow[2]));
             }
-            marginAndPercentage();
+            MarginAndPercentage();
         }
 
         void Reset()
         {
             textBox1.Text = "0";
-            label1.Text = "";
-            label2.Text = "";
+            label1.Text = label2.Text = "";
             datahiden.Clear();
             dataSeen.Clear();
         }
-        void marginAndPercentage()
+        void MarginAndPercentage()
         {
-            if (textBox1 != null && textBox1.Text != "Wybierz frakcje oraz tydzieñ aby zacz¹æ.")
+            if (!string.IsNullOrEmpty(textBox1.Text) && textBox1.Text != "Wybierz frakcje oraz tydzieñ aby zacz¹æ.")
             {
-                double i = double.Parse(textBox1.Text);
-                double o;
-                i += i * 1.7;
-                o = i * 0.3;
-                label1.Text = i.ToString();
-                label2.Text = o.ToString();
+                double sum = double.Parse(textBox1.Text);
+                double percent;
+                sum *= 1.7;
+                percent = sum * 0.3;
+                label1.Text = sum.ToString();
+                label2.Text = percent.ToString();
             }
             else textBox1.Text = "Error";
         }
